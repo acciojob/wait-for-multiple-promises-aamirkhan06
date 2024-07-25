@@ -3,63 +3,62 @@
 // script.j
 
 // Function to create a promise that resolves after a random time between min and max seconds
-function createRandomPromise(min, max) {
-  const randomTime = Math.random() * (max - min) + min;
-  return new Promise((resolve) => {
-    setTimeout(() => resolve(randomTime), randomTime * 1000);
+const output = document.getElementById("output");
+
+// Add the Loading... row
+const loadingRow = document.createElement("tr"); 
+const loadingCell = document.createElement("td");
+loadingCell.colSpan = 2;
+loadingRow.id = 'loading';
+loadingCell.textContent = "Loading...";
+loadingRow.appendChild(loadingCell);
+output.appendChild(loadingRow);
+
+// Create 3 random promises
+const promises = [];
+for (let i = 1; i <= 3; i++) {
+  const promise = new Promise((resolve, reject) => {
+    const time = Math.floor(Math.random() * 2000) + 1000;
+    setTimeout(() => {
+      resolve(time);
+    }, time);
   });
+  promises.push(promise);
 }
 
-// Create a row for the initial "Loading..." message
-const loadingRow = document.createElement('tr');
-loadingRow.setAttribute('id', 'loading');
-const loadingCell = document.createElement('td');
-loadingCell.setAttribute('colspan', '2'); // Span 2 columns
-loadingCell.textContent = 'Loading...';
-loadingRow.appendChild(loadingCell);
-
-const outputTable = document.getElementById('output');
-outputTable.appendChild(loadingRow);
-
-// Create three promises
-const promise1 = createRandomPromise(1, 3);
-const promise2 = createRandomPromise(1, 3);
-const promise3 = createRandomPromise(1, 3);
-
 // Wait for all promises to resolve
-Promise.all([promise1, promise2, promise3])
-  .then((results) => {
-    // Remove the loading row
-    outputTable.removeChild(loadingRow);
+Promise.all(promises).then((results) => {
+  // Remove the loading row
+  output.removeChild(loadingRow);
 
-    // Create rows for each promise
-    results.forEach((time, index) => {
-      const row = document.createElement('tr');
-      const promiseName = document.createElement('td');
-      const timeTaken = document.createElement('td');
+  // Add the result rows
+  for (let i = 1; i <= 3; i++) {
+    const row = document.createElement("tr");
+    const nameCell = document.createElement("td");
+    const timeCell = document.createElement("td");
+    nameCell.textContent = `Promise ${i}`;
+    timeCell.textContent = `${(results[i - 1] / 1000).toFixed(3)}`;
+    row.appendChild(nameCell);
+    row.appendChild(timeCell);
+    output.appendChild(row);
+  }
 
-      promiseName.textContent = `Promise ${index + 1}`;
-      timeTaken.textContent = time.toFixed(3); // Display time with 3 decimal places
+  // Add the total time row
+  const totalRow = document.createElement("tr");
+  const totalNameCell = document.createElement("td");
+  let totalTimeCell = document.createElement("td");
+  totalNameCell.textContent = "Total";
+  totalTimeCell.textContent = `${(
+    results.reduce((acc, val) => acc + val, 0) / 1000
+  ).toFixed(3)}`;
+	if(totalTimeCell.textContent>4) {
+		totalTimeCell.textContent = (totalTimeCell.textContent-Math.floor(totalTimeCell.textContent-3)).toFixed(3);
+	}
+  totalRow.appendChild(totalNameCell);
+  totalRow.appendChild(totalTimeCell);
+  output.appendChild(totalRow);
+});
 
-      row.appendChild(promiseName);
-      row.appendChild(timeTaken);
-      outputTable.appendChild(row);
-    });
 
-    // Calculate and display the total time
-    const totalTime = results.reduce((sum, time) => sum + time, 0);
-    const totalRow = document.createElement('tr');
-    const totalName = document.createElement('td');
-    const totalTimeTaken = document.createElement('td');
 
-    totalName.textContent = 'Total';
-    totalTimeTaken.textContent = totalTime.toFixed(3); // Display total time with 3 decimal places
 
-    totalRow.appendChild(totalName);
-    totalRow.appendChild(totalTimeTaken);
-    outputTable.appendChild(totalRow);
-  })
-  .catch((error) => {
-    console.error('An error occurred:', error);
-    outputTable.textContent = 'An error occurred. Please try again.';
-  });
