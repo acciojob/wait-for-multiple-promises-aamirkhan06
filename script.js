@@ -12,6 +12,7 @@ function createRandomPromise(min, max) {
 
 // Create a row for the initial "Loading..." message
 const loadingRow = document.createElement('tr');
+loadingRow.setAttribute('id', 'loading');
 const loadingCell = document.createElement('td');
 loadingCell.setAttribute('colspan', '2'); // Span 2 columns
 loadingCell.textContent = 'Loading...';
